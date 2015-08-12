@@ -39,12 +39,14 @@ import java.util.Date;
 public class AndroidMode extends JavaMode {
   private AndroidSDK sdk;
   private File coreZipLocation;
+  protected File coreFolder;
   private AndroidRunner runner;
 
   public static boolean sdkDownloadInProgress = false;
 
   public AndroidMode(Base base, File folder) {
     super(base, folder);
+    coreFolder = new File(folder, "core");
   }
 
 
@@ -90,29 +92,32 @@ public class AndroidMode extends JavaMode {
     return null;
   }
 
+  public File getCoreFolder() {
+	    return coreFolder;
+  }
 
   protected File getCoreZipLocation() {
-    if (coreZipLocation == null) {
-      /*
-      // for debugging only, check to see if this is an svn checkout
-      File debugFile = new File("../../../android/core.zip");
-      if (!debugFile.exists() && Base.isMacOS()) {
-        // current path might be inside Processing.app, so need to go much higher
-        debugFile = new File("../../../../../../../android/core.zip");
-      }
-      if (debugFile.exists()) {
-        System.out.println("Using version of core.zip from local SVN checkout.");
-//        return debugFile;
-        coreZipLocation = debugFile;
-      }
-      */
+	    if (coreZipLocation == null) {
+	      /*
+	      // for debugging only, check to see if this is an svn checkout
+	      File debugFile = new File("../../../android/core.zip");
+	      if (!debugFile.exists() && Base.isMacOS()) {
+	        // current path might be inside Processing.app, so need to go much higher
+	        debugFile = new File("../../../../../../../android/core.zip");
+	      }
+	      if (debugFile.exists()) {
+	        System.out.println("Using version of core.zip from local SVN checkout.");
+//	        return debugFile;
+	        coreZipLocation = debugFile;
+	      }
+	      */
 
-      // otherwise do the usual
-      //    return new File(base.getSketchbookFolder(), ANDROID_CORE_FILENAME);
-      coreZipLocation = getContentFile("android-core.zip");
-    }
-    return coreZipLocation;
-  }
+	      // otherwise do the usual
+	      //    return new File(base.getSketchbookFolder(), ANDROID_CORE_FILENAME);
+	      coreZipLocation = getContentFile("android-core.zip");
+	    }
+	    return coreZipLocation;
+	  }
 
 
 //  public AndroidSDK loadSDK() throws BadSDKException, IOException {

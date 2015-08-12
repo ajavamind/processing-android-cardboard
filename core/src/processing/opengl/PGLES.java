@@ -16,6 +16,13 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLSurfaceView.EGLConfigChooser;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.GLU;
+import android.util.Log;
+
+import com.google.vrtoolkit.cardboard.CardboardView;
+import com.google.vrtoolkit.cardboard.Eye;
+import com.google.vrtoolkit.cardboard.HeadTransform;
+import com.google.vrtoolkit.cardboard.Viewport;
+
 import processing.core.PApplet;
 import processing.opengl.tess.PGLU;
 import processing.opengl.tess.PGLUtessellator;
@@ -45,6 +52,8 @@ public class PGLES extends PGL {
   /** The renderer object driving the rendering loop, analogous to the
    * GLEventListener in JOGL */
   protected static AndroidRenderer renderer;
+  protected static AndroidCardboardStereoRenderer cardboardStereoRenderer;
+  protected static AndroidCardboardRenderer cardboardRenderer;
   protected static AndroidConfigChooser configChooser;
 
   // ........................................................
@@ -136,7 +145,6 @@ public class PGLES extends PGL {
   protected void getGL(PGL pgl) {
     PGLES pgles = (PGLES)pgl;
     this.gl = pgles.gl;
-    setThread(pgles.glThread);
   }
 
 
@@ -172,6 +180,15 @@ public class PGLES extends PGL {
     return renderer;
   }
 
+  public AndroidCardboardRenderer getCardboardRenderer() {
+    cardboardRenderer = new AndroidCardboardRenderer();
+    return cardboardRenderer;
+  }
+
+  public AndroidCardboardStereoRenderer getCardboardStereoRenderer() {
+    cardboardStereoRenderer = new AndroidCardboardStereoRenderer();
+    return cardboardStereoRenderer;
+  }
 
   public AndroidContextFactory getContextFactory() {
     return new AndroidContextFactory();
@@ -198,7 +215,7 @@ public class PGLES extends PGL {
     public void onDrawFrame(GL10 igl) {
       gl = igl;
       glThread = Thread.currentThread();
-      pg.parent.handleDraw();
+      pg.parent.handleDraw(Eye.Type.MONOCULAR);
     }
 
     public void onSurfaceChanged(GL10 igl, int iwidth, int iheight) {
@@ -214,7 +231,6 @@ public class PGLES extends PGL {
       gl = igl;
       context = ((EGL10)EGLContext.getEGL()).eglGetCurrentContext();
       glContext = context.hashCode();
-      glThread = Thread.currentThread();
 
       if (!hasFBOs()) {
         throw new RuntimeException(MISSING_FBO_ERROR);
@@ -223,6 +239,179 @@ public class PGLES extends PGL {
         throw new RuntimeException(MISSING_GLSL_ERROR);
       }
     }
+  }
+
+  protected class AndroidCardboardRenderer implements CardboardView.Renderer {
+    public AndroidCardboardRenderer() {
+    }
+
+    //@Override
+    public void onNewFrame(HeadTransform headTransform) {
+      glThread = Thread.currentThread();
+      //headTransform.getRightVector();
+//      float[] quat = new float[4];
+//      headTransform.getQuaternion(quat, 0);
+//      int count = 0;
+//      for(float f: quat ) {
+//        Log.d("PGLES", "  quat" + count + "=" + f);
+//        count++;
+//      }
+    }
+
+    //@Override
+    public void onDrawEye(Eye eye) {
+      int i = eye.getType();
+      String is = "";
+      if (i == Eye.Type.LEFT) is = "LEFT";
+      else if (i == Eye.Type.RIGHT) is = "RIGHT";
+      else if (i == Eye.Type.MONOCULAR) is = "MONOCULAR";
+      //Log.d("PGLES", "onDrawEye " + is);
+      int x = eye.getViewport().x;
+      int y = eye.getViewport().y;
+      int w = eye.getViewport().width;
+      int h = eye.getViewport().height;
+      //Log.d("PGLES", "viewport "+ x + " "+ y + " "+ w + " " + h);
+      pg.parent.handleDraw(eye.getType());
+    }
+
+    @Override
+    public void onDrawFrame(HeadTransform headTransform, Eye leftEye, Eye rightEye) {
+      glThread = Thread.currentThread();
+      pg.parent.handleHeadTransform(headTransform);
+      Viewport vleft = leftEye.getViewport();
+      int x = vleft.x;
+      int y = vleft.y;
+      int w = vleft.width;
+      int h = vleft.height;
+      //Log.d("PGLES", "onDrawFrame left viewport " + x + " "+ y + " "+ w + " " + h);
+
+      pg.parent.handleDraw(leftEye.getType());
+      if (rightEye != null) {
+        Viewport vright = rightEye.getViewport();
+        x = vright.x;
+        y = vright.y;
+        w = vright.width;
+        h = vright.height;
+        //Log.d("PGLES", "onDrawFrame right viewport " + x + " "+ y + " "+ w + " " + h);
+        pg.parent.handleDraw(rightEye.getType());
+      }
+      //Log.d("PGLES", "onDrawFrame");
+    }
+
+    @Override
+    public void onFinishFrame(Viewport viewport) {
+//      int x = viewport.x;
+//      int y = viewport.y;
+//      int w = viewport.width;
+//      int h = viewport.height;
+//      Log.d("PGLES", "onFinishFrame viewport " + x + " "+ y + " "+ w + " " + h);
+
+    }
+
+    @Override
+    public void onSurfaceChanged(int width, int height) {
+      //Log.d("PGLES", "onSurfaceChanged width="+ width + " height="+ height);
+      pg.setSize(width, height);
+      GLES20.glViewport(0, 0, width, height);
+    }
+
+    @Override
+    public void onSurfaceCreated(EGLConfig eglConfig) {
+      GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+      context = ((EGL10)EGLContext.getEGL()).eglGetCurrentContext();
+      glContext = context.hashCode();
+      if (!hasFBOs()) {
+        throw new RuntimeException(MISSING_FBO_ERROR);
+      }
+      if (!hasShaders()) {
+        throw new RuntimeException(MISSING_GLSL_ERROR);
+      }
+    }
+
+    @Override
+    public void onRendererShutdown() {
+
+    }
+
+  }
+
+  private static void checkGLError(String label) {
+    int error;
+    while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
+      Log.e("PGLES", label + ": glError " + error);
+      //throw new RuntimeException(label + ": glError " + error);
+    }
+  }
+
+  protected class AndroidCardboardStereoRenderer implements CardboardView.StereoRenderer {
+    public AndroidCardboardStereoRenderer() {
+    }
+
+    @Override
+    public void onNewFrame(HeadTransform headTransform) {
+      glThread = Thread.currentThread();
+      pg.parent.handleHeadTransform(headTransform);
+
+//      float[] quat = new float[4];
+//      headTransform.getQuaternion(quat, 0);
+//      int count = 0;
+//      for(float f: quat ) {
+//        Log.d("PGLES", "  quat" + count + "=" + f);
+//        count++;
+//      }
+    }
+
+    @Override
+    public void onDrawEye(Eye eye) {
+//      int i = eye.getType();
+//      String is = "";
+//      if (i == Eye.Type.LEFT) is = "LEFT";
+//      else if (i == Eye.Type.RIGHT) is = "RIGHT";
+//      else if (i == Eye.Type.MONOCULAR) is = "MONOCULAR";
+//      Log.d("PGLES", "onDrawEye " + is);
+//      int x = eye.getViewport().x;
+//      int y = eye.getViewport().y;
+//      int w = eye.getViewport().width;
+//      int h = eye.getViewport().height;
+//      Log.d("PGLES", "onDrawEye viewport "+ x + " "+ y + " "+ w + " " + h);
+      pg.parent.handleDraw(eye.getType());
+    }
+
+    @Override
+    public void onFinishFrame(Viewport viewport) {
+//      int x = viewport.x;
+//      int y = viewport.y;
+//      int w = viewport.width;
+//      int h = viewport.height;
+//      Log.d("PGLES", "onFinishFrame viewport " + x + " "+ y + " "+ w + " " + h);
+
+    }
+
+    @Override
+    public void onSurfaceChanged(int width, int height) {
+      //Log.d("PGLES", "onSurfaceChanged width="+ width + " height="+ height);
+      pg.setSize(width, height);
+      GLES20.glViewport(0, 0, width, height);
+    }
+
+    @Override
+    public void onSurfaceCreated(EGLConfig eglConfig) {
+      GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+      context = ((EGL10)EGLContext.getEGL()).eglGetCurrentContext();
+      glContext = context.hashCode();
+      if (!hasFBOs()) {
+        throw new RuntimeException(MISSING_FBO_ERROR);
+      }
+      if (!hasShaders()) {
+        throw new RuntimeException(MISSING_GLSL_ERROR);
+      }
+    }
+
+    @Override
+    public void onRendererShutdown() {
+
+    }
+
   }
 
 
@@ -1094,6 +1283,11 @@ public class PGLES extends PGL {
     GLES20.glViewport(x, y, w, h);
   }
 
+  @Override
+  public void loadIdentity() {
+    // TODO ??
+  }
+
   //////////////////////////////////////////////////////////////////////////////
 
   // Reading Pixels
@@ -1256,7 +1450,7 @@ public class PGLES extends PGL {
 
   @Override
   public void texParameterf(int target, int pname, float param) {
-    gl.glTexParameterf(target, pname, param);
+    GLES20.glTexParameterf(target, pname, param);
   }
 
   @Override
@@ -1785,12 +1979,12 @@ public class PGLES extends PGL {
 
   @Override
   public void readBuffer(int buf) {
-//    throw new RuntimeException(String.format(MISSING_GLFUNC_ERROR, "glReadBuffer()"));
+    throw new RuntimeException(String.format(MISSING_GLFUNC_ERROR, "glReadBuffer()"));
   }
 
   @Override
   public void drawBuffer(int buf) {
-//    throw new RuntimeException(String.format(MISSING_GLFUNC_ERROR, "glDrawBuffer()"));
+    throw new RuntimeException(String.format(MISSING_GLFUNC_ERROR, "glDrawBuffer()"));
   }
 
 

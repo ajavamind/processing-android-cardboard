@@ -51,7 +51,9 @@ class AndroidBuild extends JavaBuild {
 
   private final AndroidSDK sdk;
   private final File coreZipFile;
-
+  private final AndroidMode mode;
+  private final File coreFolder;
+  
   /** whether this is a "debug" or "release" build */
   private String target;
   private Manifest manifest;
@@ -65,9 +67,10 @@ class AndroidBuild extends JavaBuild {
 
   public AndroidBuild(final Sketch sketch, final AndroidMode mode) {
     super(sketch);
-
+    this.mode = mode;
     sdk = mode.getSDK();
     coreZipFile = mode.getCoreZipLocation();
+    coreFolder = mode.getCoreFolder();
   }
 
   public static void setSdkTarget(AndroidSDK.SDKTarget target, Sketch sketch) {
@@ -168,7 +171,7 @@ class AndroidBuild extends JavaBuild {
 
       final File resFolder = new File(tmpFolder, "res");
       writeRes(resFolder, sketchClassName);
-      writeMainActivity(srcFolder);
+      //writeMainActivity(srcFolder);
 
 
       // new location for SDK Tools 17: /opt/android/tools/proguard/proguard-android.txt
@@ -178,7 +181,7 @@ class AndroidBuild extends JavaBuild {
 
       final File libsFolder = mkdirs(tmpFolder, "libs");
       final File assetsFolder = mkdirs(tmpFolder, "assets");
-
+      System.out.println("coreZipFile="+ coreZipFile.getName());
 //      InputStream input = PApplet.createInput(getCoreZipLocation());
 //      PApplet.saveStream(new File(libsFolder, "processing-core.jar"), input);
       Util.copyFile(coreZipFile, new File(libsFolder, "processing-core.jar"));
@@ -187,12 +190,22 @@ class AndroidBuild extends JavaBuild {
       // and anything in the code folder contents to the project.
       copyLibraries(libsFolder, assetsFolder);
       copyCodeFolder(libsFolder);
-
+      
       // Copy the data folder (if one exists) to the project's 'assets' folder
       final File sketchDataFolder = sketch.getDataFolder();
       if (sketchDataFolder.exists()) {
         Util.copyDir(sketchDataFolder, assetsFolder);
       }
+      
+      if (coreFolder.exists()) {
+    	  File copyFolder = new File(coreFolder, "src");
+    	  Util.copyDir(copyFolder, assetsFolder);
+      }
+      
+      String[] af = assetsFolder.list();
+      System.out.println("assets folder="+ assetsFolder.getName());
+      for (String s: af )
+    	  System.out.println(s);
 
       // Do the same for the 'res' folder.
       // http://code.google.com/p/processing/issues/detail?id=767
@@ -254,7 +267,7 @@ class AndroidBuild extends JavaBuild {
         if (!pr.succeeded()) {
           System.err.println(pr.getStderr());
           Base.showWarning("Failed to rename",
-                           "Could not rename the old “android” build folder.\n" +
+                           "Could not rename the old android build folder.\n" +
                            "Please delete, close, or rename the folder\n" +
                            androidFolder.getAbsolutePath() + "\n" +
                            "and try again." , null);
@@ -974,9 +987,11 @@ class AndroidBuild extends JavaBuild {
   private void copyLibraries(final File libsFolder,
                              final File assetsFolder) throws IOException {
     for (Library library : getImportedLibraries()) {
+    	System.out.println("library:" + library.getName());
       // add each item from the library folder / export list to the output
       for (File exportFile : library.getAndroidExports()) {
         String exportName = exportFile.getName();
+        System.out.println("exportName="+ exportName);
         if (!exportFile.exists()) {
           System.err.println(exportFile.getName() +
                              " is mentioned in export.txt, but it's " +

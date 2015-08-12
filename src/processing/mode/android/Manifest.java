@@ -40,7 +40,7 @@ public class Manifest {
   static final String WORLD_OF_HURT_COMING =
     "Errors occurred while reading or writing " + MANIFEST_XML + ",\n" +
     "which means lots of things are likely to stop working properly.\n" +
-    "To prevent losing any data, it's recommended that you use “Save As”\n" +
+    "To prevent losing any data, it's recommended that you use Save As\n" +
     "to save a separate copy of your sketch, and the restart Processing.";
   static final String MULTIPLE_ACTIVITIES =
     "Processing only supports a single Activity in the AndroidManifest.xml\n" +
@@ -220,10 +220,10 @@ public class Manifest {
       }
       app.setString("android:debuggable", debug ? "true" : "false");
 
-//      XML activity = app.getChild("activity");
+      XML activity = app.getChild("activity");
       // the '.' prefix is just an alias for the full package name
       // http://developer.android.com/guide/topics/manifest/activity-element.html#name
-//      activity.setString("android:name", "." + className);  // this has to be right
+      activity.setString("android:name", "." + className);  // this has to be right
 
       PrintWriter writer = PApplet.createWriter(file);
       writer.print(mf.toString());

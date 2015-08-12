@@ -737,7 +737,7 @@ public class PGraphics extends PImage implements PConstants {
    * image data, for instance a BufferedImage with tint() settings applied for
    * PGraphicsJava2D, or resized image data and OpenGL texture indices for
    * PGraphicsOpenGL.
-   * @param renderer The PGraphics renderer associated to the image
+   * @param image The PGraphics renderer associated to the image
    * @param storage The metadata required by the renderer
    */
   public void setCache(PImage image, Object storage) {
@@ -750,7 +750,7 @@ public class PGraphics extends PImage implements PConstants {
    * will cache data in different formats, it's necessary to store cache data
    * keyed by the renderer object. Otherwise, attempting to draw the same
    * image to both a PGraphicsJava2D and a PGraphicsOpenGL will cause errors.
-   * @param renderer The PGraphics renderer associated to the image
+   * @param image The PGraphics renderer associated to the image
    * @return metadata stored for the specified renderer
    */
   public Object getCache(PImage image) {
@@ -760,7 +760,7 @@ public class PGraphics extends PImage implements PConstants {
 
   /**
    * Remove information associated with this renderer from the cache, if any.
-   * @param renderer The PGraphics renderer whose cache data should be removed
+   * @param image The PGraphics renderer whose cache data should be removed
    */
   public void removeCache(PImage image) {
     cacheMap.remove(image);

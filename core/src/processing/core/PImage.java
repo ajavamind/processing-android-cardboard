@@ -1364,7 +1364,7 @@ public class PImage implements PConstants, Cloneable {
 
   /**
    * Blends one area of this image to another area.
-   * @see processing.core.PImage#blendColor(int,int,int)
+   * @see PImage#blendColor(int,int,int)
    */
   public void blend(int sx, int sy, int sw, int sh,
                     int dx, int dy, int dw, int dh, int mode) {
@@ -1374,7 +1374,7 @@ public class PImage implements PConstants, Cloneable {
 
   /**
    * Copies area of one image into another PImage object.
-   * @see processing.core.PImage#blendColor(int,int,int)
+   * @see PImage#blendColor(int,int,int)
    */
   public void blend(PImage src,
                     int sx, int sy, int sw, int sh,

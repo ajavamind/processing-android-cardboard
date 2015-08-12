@@ -2605,6 +2605,7 @@ public abstract class PGL {
 
   public abstract void depthRangef(float n, float f);
   public abstract void viewport(int x, int y, int w, int h);
+  public abstract void loadIdentity();
 
   //////////////////////////////////////////////////////////////////////////////
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project default="build" name="Create .zip file for core">
+<project default="build" name="Create AndroidMode.zip file for core">
   <property environment="env" />
 
   <!-- path to the main processing repo --> 
@@ -16,10 +16,10 @@
   </target>
 
   <target name="sdk_whining">
-    <available file="${env.ANDROID_SDK}/platforms/android-15/android.jar"
+    <available file="${env.ANDROID_SDK}/platforms/android-19/android.jar"
 	       property="andoid-jar-present" />
     <fail unless="andoid-jar-present" 
-	  message="Android SDK 10 could not be found in ${env.ANDROID_SDK}/platforms/android-15/android.jar" />
+	  message="Android SDK 19 could not be found in ${env.ANDROID_SDK}/platforms/android-19/android.jar" />
   </target>
 
   <target name="actual_build" if="env.ANDROID_SDK">
@@ -29,16 +29,20 @@
     <methods dir="${basedir}/src/processing/core" recorder="false" />
 
     <mkdir dir="bin" />
-    <javac source="1.6" 
-	   target="1.6" 
+  	<!--	   bootclasspath="${env.ANDROID_SDK}/platforms/android-19/android.jar"  -->
+
+    <javac source="1.7" 
+	   target="1.7" 
 	   encoding="UTF-8"
 	   includeAntRuntime="false"
-	   bootclasspath="${env.ANDROID_SDK}/platforms/android-15/android.jar"
+       classpath="${env.ANDROID_SDK}/platforms/android-19/android.jar;${basedir}/../lib/cardboard.jar;${basedir}/../lib/libprotobuf-java-2.6-nano.jar"
 	   srcdir="src" destdir="bin" />
 
-    <!-- Copy the shaders to the bin folder. 
-	 Eclipse does this automatically. -->
-    <copy todir="bin">
+  	<unzip src="${basedir}/../lib/cardboard.jar" dest="bin"/>
+  	<unzip src="${basedir}/../lib/libprotobuf-java-2.6-nano.jar" dest="bin"/>
+    <!-- Preparation to copy the shaders to the assets folder.  -->
+  	<mkdir dir="bin/shaders" />
+    <copy todir="bin/shaders">
       <fileset dir="src">
 	    <include name="processing/opengl/shaders/*.glsl" />
       </fileset>

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<project name="Android Mode for Processing" default="build">
+<project name="Android Cardboard Mode for Processing" default="build">
 
   <!-- path to the main processing repo --> 
   <property name="processing.dir" value="../processing" />
@@ -54,7 +54,7 @@
   </target>
 
 
-  <target name="build" depends="compile" description="Build Android mode">
+  <target name="build" depends="compile" description="Build Android Cardboard Mode">
     <jar basedir="bin" destfile="${mode.jar.path}" />
   </target>
 
@@ -87,13 +87,15 @@
 	<include name="mode/**" />
 	<include name="examples/**" />
 	<include name="icons/**" />
-	<include name="theme/**" />
+    <include name="theme/**" />
+    <include name="core/src/processing/opengl/shaders/**" />
 	<exclude name="**/._*" />
       </zipfileset>
     </zip>
 
     <copy file="mode.properties" 
 	  tofile="release/AndroidMode.txt" />
+
   </target>
 
 

@@ -34,13 +34,19 @@ import java.util.*;
  * OpenGL renderer.
  */
 public class PGraphicsOpenGL extends PGraphics {
-  /** Interface between Processing and OpenGL */
+  /**
+   * Interface between Processing and OpenGL
+   */
   public PGL pgl;
 
-  /** The renderer currently in use. */
+  /**
+   * The renderer currently in use.
+   */
   protected PGraphicsOpenGL currentPG;
 
-  /** Font cache for texture objects. */
+  /**
+   * Font cache for texture objects.
+   */
   protected WeakHashMap<PFont, FontTexture> fontMap;
 
   // just to get things running properly, need to
@@ -50,22 +56,30 @@ public class PGraphicsOpenGL extends PGraphics {
 
   // Basic rendering parameters:
 
-  /** Whether the PGraphics object is ready to render or not. */
+  /**
+   * Whether the PGraphics object is ready to render or not.
+   */
   public boolean initialized;
 
-  /** Flush modes: continuously (geometry is flushed after each call to
+  /**
+   * Flush modes: continuously (geometry is flushed after each call to
    * endShape) when-full (geometry is accumulated until a maximum size is
-   * reached.  */
+   * reached.
+   */
   static protected final int FLUSH_CONTINUOUSLY = 0;
-  static protected final int FLUSH_WHEN_FULL    = 1;
+  static protected final int FLUSH_WHEN_FULL = 1;
 
-  /** Type of geometry: immediate is that generated with beginShape/vertex/
+  /**
+   * Type of geometry: immediate is that generated with beginShape/vertex/
    * endShape, retained is the result of creating a PShapeOpenGL object with
-   * createShape. */
+   * createShape.
+   */
   static protected final int IMMEDIATE = 0;
-  static protected final int RETAINED  = 1;
+  static protected final int RETAINED = 1;
 
-  /** Current flush mode. */
+  /**
+   * Current flush mode.
+   */
   protected int flushMode = FLUSH_WHEN_FULL;
 
   // ........................................................
@@ -101,8 +115,8 @@ public class PGraphicsOpenGL extends PGraphics {
   // Generic vertex attributes (only for polys)
   protected AttributeMap polyAttribs;
 
-  static protected final int INIT_VERTEX_BUFFER_SIZE  = 256;
-  static protected final int INIT_INDEX_BUFFER_SIZE   = 512;
+  static protected final int INIT_VERTEX_BUFFER_SIZE = 256;
+  static protected final int INIT_INDEX_BUFFER_SIZE = 512;
 
   // ........................................................
 
@@ -110,7 +124,9 @@ public class PGraphicsOpenGL extends PGraphics {
 
   static protected boolean glParamsRead = false;
 
-  /** Extensions used by Processing */
+  /**
+   * Extensions used by Processing
+   */
   static public boolean npotTexSupported;
   static public boolean autoMipmapGenSupported;
   static public boolean fboMultisampleSupported;
@@ -118,14 +134,18 @@ public class PGraphicsOpenGL extends PGraphics {
   static public boolean anisoSamplingSupported;
   static public boolean blendEqSupported;
 
-  /** Some hardware limits */
+  /**
+   * Some hardware limits
+   */
   static public int maxTextureSize;
   static public int maxSamples;
   static public float maxAnisoAmount;
   static public int depthBits;
   static public int stencilBits;
 
-  /** OpenGL information strings */
+  /**
+   * OpenGL information strings
+   */
   static public String OPENGL_VENDOR;
   static public String OPENGL_RENDERER;
   static public String OPENGL_VERSION;
@@ -137,51 +157,52 @@ public class PGraphicsOpenGL extends PGraphics {
   // GL resources:
 
   static protected HashMap<GLResource, Boolean> glTextureObjects =
-    new HashMap<GLResource, Boolean>();
+          new HashMap<GLResource, Boolean>();
   static protected HashMap<GLResource, Boolean> glVertexBuffers =
-    new HashMap<GLResource, Boolean>();
+          new HashMap<GLResource, Boolean>();
   static protected HashMap<GLResource, Boolean> glFrameBuffers =
-    new HashMap<GLResource, Boolean>();
+          new HashMap<GLResource, Boolean>();
   static protected HashMap<GLResource, Boolean> glRenderBuffers =
-    new HashMap<GLResource, Boolean>();
+          new HashMap<GLResource, Boolean>();
   static protected HashMap<GLResource, Boolean> glslPrograms =
-    new HashMap<GLResource, Boolean>();
+          new HashMap<GLResource, Boolean>();
   static protected HashMap<GLResource, Boolean> glslVertexShaders =
-    new HashMap<GLResource, Boolean>();
+          new HashMap<GLResource, Boolean>();
   static protected HashMap<GLResource, Boolean> glslFragmentShaders =
-    new HashMap<GLResource, Boolean>();
+          new HashMap<GLResource, Boolean>();
 
   // ........................................................
 
   // Shaders
 
+  ///////////////////////
   static protected URL defColorShaderVertURL =
-    PGraphicsOpenGL.class.getResource("/processing/opengl/shaders/ColorVert.glsl");
+          PGraphicsOpenGL.class.getResource("/assets/processing/opengl/shaders/ColorVert.glsl");
   static protected URL defTextureShaderVertURL =
-    PGraphicsOpenGL.class.getResource("/processing/opengl/shaders/TexVert.glsl");
+          PGraphicsOpenGL.class.getResource("/assets/processing/opengl/shaders/TexVert.glsl");
   static protected URL defLightShaderVertURL =
-    PGraphicsOpenGL.class.getResource("/processing/opengl/shaders/LightVert.glsl");
+          PGraphicsOpenGL.class.getResource("/assets/processing/opengl/shaders/LightVert.glsl");
   static protected URL defTexlightShaderVertURL =
-    PGraphicsOpenGL.class.getResource("/processing/opengl/shaders/TexLightVert.glsl");
+          PGraphicsOpenGL.class.getResource("/assets/processing/opengl/shaders/TexLightVert.glsl");
   static protected URL defColorShaderFragURL =
-    PGraphicsOpenGL.class.getResource("/processing/opengl/shaders/ColorFrag.glsl");
+          PGraphicsOpenGL.class.getResource("/assets/processing/opengl/shaders/ColorFrag.glsl");
   static protected URL defTextureShaderFragURL =
-    PGraphicsOpenGL.class.getResource("/processing/opengl/shaders/TexFrag.glsl");
+          PGraphicsOpenGL.class.getResource("/assets/processing/opengl/shaders/TexFrag.glsl");
   static protected URL defLightShaderFragURL =
-    PGraphicsOpenGL.class.getResource("/processing/opengl/shaders/LightFrag.glsl");
+          PGraphicsOpenGL.class.getResource("/assets/processing/opengl/shaders/LightFrag.glsl");
   static protected URL defTexlightShaderFragURL =
-    PGraphicsOpenGL.class.getResource("/processing/opengl/shaders/TexLightFrag.glsl");
+          PGraphicsOpenGL.class.getResource("/assets/processing/opengl/shaders/TexLightFrag.glsl");
 
   static protected URL defLineShaderVertURL =
-    PGraphicsOpenGL.class.getResource("/processing/opengl/shaders/LineVert.glsl");
+          PGraphicsOpenGL.class.getResource("/assets/processing/opengl/shaders/LineVert.glsl");
   static protected URL defLineShaderFragURL =
-    PGraphicsOpenGL.class.getResource("/processing/opengl/shaders/LineFrag.glsl");
+          PGraphicsOpenGL.class.getResource("/assets/processing/opengl/shaders/LineFrag.glsl");
   static protected URL defPointShaderVertURL =
-    PGraphicsOpenGL.class.getResource("/processing/opengl/shaders/PointVert.glsl");
+          PGraphicsOpenGL.class.getResource("/assets/processing/opengl/shaders/PointVert.glsl");
   static protected URL defPointShaderFragURL =
-    PGraphicsOpenGL.class.getResource("/processing/opengl/shaders/PointFrag.glsl");
+          PGraphicsOpenGL.class.getResource("/assets/processing/opengl/shaders/PointFrag.glsl");
   static protected URL maskShaderFragURL =
-    PGraphicsOpenGL.class.getResource("/processing/opengl/shaders/MaskFrag.glsl");
+          PGraphicsOpenGL.class.getResource("/assets/processing/opengl/shaders/MaskFrag.glsl");
 
   protected PShader defColorShader;
   protected PShader defTextureShader;
@@ -527,6 +548,7 @@ public class PGraphicsOpenGL extends PGraphics {
 
 
   public PGraphicsOpenGL() {
+
     pgl = createPGL(this);
 
     if (tessellator == null) {
@@ -1755,7 +1777,6 @@ public class PGraphicsOpenGL extends PGraphics {
   @Override
   public void endDraw() {
     report("top endDraw()");
-
     if (!drawing) {
       return;
     }
@@ -6995,7 +7016,7 @@ public class PGraphicsOpenGL extends PGraphics {
     PGraphicsOpenGL ppg = getPrimaryPG();
     if (lineShader == null) {
       if (ppg.defLineShader == null) {
-        String[] vertSource = pgl.loadVertexShader(defLineShaderVertURL, 120);
+        String[] vertSource = pgl.loadVertexShader(defLineShaderVertURL , 120);
         String[] fragSource = pgl.loadFragmentShader(defLineShaderFragURL, 120);
         ppg.defLineShader = new PShader(parent, vertSource, fragSource);
       }
@@ -7291,7 +7312,7 @@ public class PGraphicsOpenGL extends PGraphics {
     }
 
     void clear() {
-      java.util.Arrays.fill(textures, 0, size, null);
+      Arrays.fill(textures, 0, size, null);
       size = 0;
       hasTextures = false;
     }

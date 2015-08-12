@@ -169,7 +169,7 @@ public class PGraphicsAndroid2D extends PGraphics {
 
   @Override
   public void requestDraw() {
-    parent.handleDraw();
+    parent.handleDraw(0);
   }
 
 
@@ -1089,7 +1089,7 @@ public class PGraphicsAndroid2D extends PGraphics {
     // but I don't think it is particularly efficient, as the bitmaps are stored
     // in native heap for Android 10 and older.
     MemoryInfo mi = new MemoryInfo();
-    ActivityManager activityManager = (ActivityManager) parent.getActivity().getSystemService(android.content.Context.ACTIVITY_SERVICE);
+    ActivityManager activityManager = (ActivityManager) parent.getApplicationContext().getSystemService(android.content.Context.ACTIVITY_SERVICE);
     activityManager.getMemoryInfo(mi);
     if (mi.lowMemory) {
       src.bitmap.recycle();

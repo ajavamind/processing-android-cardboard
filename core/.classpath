@@ -2,5 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="var" path="ANDROID_LIB"/>
+	<classpathentry kind="lib" path="/android-mode/lib/cardboard.jar"/>
+	<classpathentry kind="lib" path="/android-mode/lib/libprotobuf-java-2.6-nano.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrew/AppData/Local/Android/sdk/platforms/android-19/android.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
