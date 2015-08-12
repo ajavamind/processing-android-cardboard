@@ -1,6 +1,9 @@
 Convert Android Mode (2.2.1) to Android Cardboard Mode
+
 Experimental - does not use latest 3.0 Android core
+
 Works with Processing version 3.0
+
 The output of release build replaces AndroidMode.zip in modes folder of Processing 3.0
 
 Processing for Android
